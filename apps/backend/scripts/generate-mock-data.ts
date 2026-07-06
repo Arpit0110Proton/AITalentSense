@@ -393,7 +393,7 @@ function generateSummary(
 
 // Main generation
 async function main() {
-  console.log("🌱 Seeding 1,275 mock_profiles (MNC corporate roles)...\n");
+  console.log("🌱 Seeding 1,500 mock_profiles (MNC corporate roles)...\n");
 
   // Truncate
   const { error: truncErr } = await supabase
@@ -409,9 +409,9 @@ async function main() {
   const allRows: Record<string, unknown>[] = [];
   const currentYear = new Date().getFullYear();
 
-  // Generate 85 profiles per family × 15 families = 1,275 profiles (750 + 525 additional)
+  // Generate 100 profiles per family × 15 families = 1,500 profiles (original 750 + 750 additional)
   for (const family of ROLE_FAMILIES) {
-    for (let i = 0; i < 85; i++) {
+    for (let i = 0; i < 100; i++) {
       let first: string, last: string, fullName: string;
       let attempts = 0;
       do {
@@ -530,7 +530,7 @@ async function main() {
     .from("mock_profiles")
     .select("*", { count: "exact", head: true });
   console.log(`  Total rows: ${total}`);
-  if (total !== 1275) { console.error("  ❌ Expected 1275 rows"); process.exit(1); }
+  if (total !== 1500) { console.error("  ❌ Expected 1500 rows"); process.exit(1); }
 
   // Count per role family
   for (const family of ROLE_FAMILIES) {
@@ -539,7 +539,7 @@ async function main() {
       .select("*", { count: "exact", head: true })
       .eq("role_family", family);
     console.log(`  ${family}: ${count}`);
-    if (count !== 85) { console.error(`  ❌ Expected 85 for ${family}`); process.exit(1); }
+    if (count !== 100) { console.error(`  ❌ Expected 100 for ${family}`); process.exit(1); }
   }
 
   // Count per seniority
@@ -559,7 +559,7 @@ async function main() {
   const nullLinkedin = (allProfiles || []).filter((r: any) =>
     r.profile?.basic_profile?.linkedin_profile_url === null
   ).length;
-  console.log(`  Null LinkedIn: ${nullLinkedin} (~${Math.round(nullLinkedin / 12.75)}%)`);
+  console.log(`  Null LinkedIn: ${nullLinkedin} (~${Math.round(nullLinkedin / 15)}%)`);
 
   // Smoke query: "React" + senior
   const { data: smoke } = await supabase
