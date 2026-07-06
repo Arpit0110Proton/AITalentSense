@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-cream: #F7F1E3;
+    --color-forest: #273214;
+    --color-olive: #556B2F;
+    --color-sage: #8A9B63;
+    --color-tan: #C9B28A;
+    --color-espresso: #3B2F2A;
+    --color-clay: #9C4A33;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-satoshi), sans-serif;
+    background-color: var(--color-cream);
+    color: var(--color-espresso);
+  }
+
+  /* Selection color — §8.2 */
+  ::selection {
+    background: #556B2F;
+    color: #F7F1E3;
+  }
+
+  /* Focus ring — 2px olive offset 2px on EVERY interactive element — §8.1 */
+  :focus-visible {
+    outline: 2px solid #556B2F;
+    outline-offset: 2px;
+  }
+
+  /* Score numerals — tabular nums */
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Link style on cream — §8.2 */
+  a:not(.no-underline) {
+    text-decoration-line: underline;
+    text-decoration-color: #556B2F;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+    transition: text-decoration-thickness 0.2s;
+  }
+  a:not(.no-underline):hover {
+    text-decoration-thickness: 2.5px;
+  }
+
+  /* Eyebrow label device — §8.2: label token, 24px olive rule to the left */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-satoshi), sans-serif;
+    font-size: 12px;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    font-weight: 560;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .eyebrow::before {
+    content: "";
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: #556B2F;
+    flex-shrink: 0;
+  }
+
+  /* Hairlines — §8.3 */
+  .hairline-cream {
+    border-color: #C9B28A;
+    border-width: 1px;
+  }
+  .hairline-forest {
+    border-color: rgba(138, 155, 99, 0.3);
+    border-width: 1px;
+  }
+}
+
+@layer components {
+  /* Label style (uppercase) */
+  .text-label {
+    font-size: 12px;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    font-weight: 560;
+    text-transform: uppercase;
+  }
+}
+
+/* Reduced motion — global overrides for animations not handled by Framer */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.2s !important;
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "ai-talent-sense",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend dev\"",
+    "build": "pnpm -r build",
+    "seed": "pnpm --filter backend seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
