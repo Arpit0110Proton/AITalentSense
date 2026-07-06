@@ -41,86 +41,92 @@ export function CandidateCard({
       {/* Main card */}
       <button
         onClick={onToggle}
-        className="w-full text-left px-5 py-4 grid gap-4 items-start"
+        className="w-full text-left px-5 py-4 flex flex-col sm:grid gap-4 items-start"
         style={{ gridTemplateColumns: "72px 1fr auto" }}
       >
-        {/* Score ring */}
-        <ScoreRing score={scored?.score ?? null} />
+        <div className="flex gap-4 w-full sm:contents">
+          {/* Score ring */}
+          <ScoreRing score={scored?.score ?? null} />
 
-        {/* Main content */}
-        <div className="min-w-0">
-          <h3 className="font-fraunces text-h3 text-forest truncate">
-            {candidate.name}
-          </h3>
-          <p className="font-satoshi text-small text-espresso-80 truncate mt-0.5">
-            {candidate.headline}
-          </p>
-          {scored && (
-            <p className="font-satoshi text-body text-espresso mt-1.5 line-clamp-2">
-              {scored.blurb}
+          {/* Main content */}
+          <div className="min-w-0 flex-1">
+            <h3 className="font-fraunces text-h3 text-forest truncate">
+              {candidate.name}
+            </h3>
+            <p className="font-satoshi text-small text-espresso-80 truncate mt-0.5">
+              {candidate.headline}
             </p>
-          )}
-          {!scored && (
-            <div className="mt-1.5 h-4 w-3/4 rounded bg-tan-30 animate-pulse" />
-          )}
-          {/* Skill pills */}
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {skills.map((skill) => (
-              <span
-                key={skill}
-                className="inline-block rounded-chip bg-olive-10 px-2 py-0.5 font-satoshi text-[11px] text-espresso"
-              >
-                {skill}
-              </span>
-            ))}
-            {hasOverflow && (
-              <span className="inline-block rounded-chip bg-tan-30 px-2 py-0.5 font-satoshi text-[11px] text-espresso-60">
-                +{candidate.skills.length - 6}
-              </span>
+            {scored && (
+              <p className="font-satoshi text-body text-espresso mt-1.5 line-clamp-2">
+                {scored.blurb}
+              </p>
             )}
+            {!scored && (
+              <div className="mt-1.5 h-4 w-3/4 rounded bg-tan-30 animate-pulse" />
+            )}
+            {/* Skill pills */}
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {skills.map((skill) => (
+                <span
+                  key={skill}
+                  className="inline-block rounded-chip bg-olive-10 px-2 py-0.5 font-satoshi text-[11px] text-espresso"
+                >
+                  {skill}
+                </span>
+              ))}
+              {hasOverflow && (
+                <span className="inline-block rounded-chip bg-tan-30 px-2 py-0.5 font-satoshi text-[11px] text-espresso-60">
+                  +{candidate.skills.length - 6}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Meta right */}
-        <div className="flex flex-col items-end gap-1.5 text-right">
-          <span className="flex items-center gap-1 font-satoshi text-small text-espresso-60">
-            <MapPin className="h-3.5 w-3.5" />
-            {candidate.location || "—"}
-          </span>
-          <span className="flex items-center gap-1 font-satoshi text-small text-espresso-60">
-            <Clock className="h-3.5 w-3.5" />
-            {candidate.yearsOfExperience} yrs
-          </span>
-          {candidate.linkedinUrl ? (
-            <a
-              href={candidate.linkedinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 font-satoshi text-small text-olive no-underline hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              LinkedIn <ExternalLink className="h-3 w-3" />
-            </a>
-          ) : (
-            <span className="font-satoshi text-small text-espresso-60">
-              No LinkedIn on file
+        {/* Meta details */}
+        <div className="flex sm:flex-col items-center sm:items-end flex-wrap gap-x-4 gap-y-1.5 text-right w-full sm:w-auto border-t border-tan-30/60 pt-3 sm:border-0 sm:pt-0 justify-between sm:justify-start">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 items-center">
+            <span className="flex items-center gap-1 font-satoshi text-small text-espresso-60">
+              <MapPin className="h-3.5 w-3.5" />
+              {candidate.location || "—"}
             </span>
-          )}
-          {scored?.scoredBy === "heuristic" && (
-            <span
-              className="inline-flex items-center gap-1 font-satoshi text-[11px] text-sage"
-              title="Heuristic score — AI scorer was unavailable."
-            >
-              <AlertCircle className="h-3 w-3" />
-              Heuristic
+            <span className="flex items-center gap-1 font-satoshi text-small text-espresso-60">
+              <Clock className="h-3.5 w-3.5" />
+              {candidate.yearsOfExperience} yrs
             </span>
-          )}
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.35 }}
-          >
-            <ChevronDown className="h-4 w-4 text-espresso-60" />
-          </motion.div>
+            {candidate.linkedinUrl ? (
+              <a
+                href={candidate.linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 font-satoshi text-small text-olive no-underline hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                LinkedIn <ExternalLink className="h-3 w-3" />
+              </a>
+            ) : (
+              <span className="font-satoshi text-small text-espresso-60">
+                No LinkedIn
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {scored?.scoredBy === "heuristic" && (
+              <span
+                className="inline-flex items-center gap-1 font-satoshi text-[11px] text-sage"
+                title="Heuristic score — AI scorer was unavailable."
+              >
+                <AlertCircle className="h-3 w-3" />
+                Heuristic
+              </span>
+            )}
+            <motion.div
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              <ChevronDown className="h-4 w-4 text-espresso-60" />
+            </motion.div>
+          </div>
         </div>
       </button>
 

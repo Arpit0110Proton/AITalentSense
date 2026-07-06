@@ -42,7 +42,7 @@ export function SortBar({
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
         {/* Sort segmented control — §11.2.5 */}
         <div className="flex items-center gap-1">
           <span className="font-satoshi text-small text-espresso-60 mr-1">Sort:</span>
@@ -68,25 +68,27 @@ export function SortBar({
           </button>
         </div>
 
-        <Button
-          variant="secondary"
-          onClick={onExport}
-          disabled={!scoringComplete}
-          title={scoringComplete ? "Export CSV" : "Scoring in progress…"}
-          className="!px-3 !py-1.5 !text-small"
-        >
-          <Download className="h-3.5 w-3.5" />
-          Export CSV
-        </Button>
+        <div className="flex items-center gap-2 w-full sm:w-auto flex-1 sm:flex-none">
+          <Button
+            variant="secondary"
+            onClick={onExport}
+            disabled={!scoringComplete}
+            title={scoringComplete ? "Export CSV" : "Scoring in progress…"}
+            className="!px-3 !py-1.5 !text-small flex-1 sm:flex-initial justify-center"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export CSV
+          </Button>
 
-        <Button
-          onClick={onSaveShortlist}
-          disabled={!scoringComplete}
-          className="!px-3 !py-1.5 !text-small"
-        >
-          <Save className="h-3.5 w-3.5" />
-          Save shortlist
-        </Button>
+          <Button
+            onClick={onSaveShortlist}
+            disabled={!scoringComplete}
+            className="!px-3 !py-1.5 !text-small flex-1 sm:flex-initial justify-center"
+          >
+            <Save className="h-3.5 w-3.5" />
+            Save shortlist
+          </Button>
+        </div>
       </div>
     </div>
   );
