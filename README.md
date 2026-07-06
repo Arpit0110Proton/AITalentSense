@@ -62,7 +62,7 @@ ai-talent-sense/
 
 | Mode | Trigger | Source |
 |------|---------|--------|
-| Demo | `CRUSTDATA_API_KEY` is empty | 750 synthetic profiles from Supabase |
+| Demo | `CRUSTDATA_API_KEY` is empty | 1500 synthetic profiles from Supabase |
 | Live | `CRUSTDATA_API_KEY` is set | Real-time CrustData Person Search API |
 
 The mode is determined once at server boot and never changes at runtime.
