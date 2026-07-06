@@ -8,20 +8,20 @@ const LINKS = [
   {
     icon: Mail,
     label: "Email",
-    href: "mailto:arpitsingh@example.com",
-    display: "arpitsingh@example.com",
+    href: "mailto:hello@aitalentsense.com",
+    display: "hello@aitalentsense.com",
   },
   {
     icon: Github,
     label: "GitHub",
-    href: "https://github.com/arpitsingh",
-    display: "github.com/arpitsingh",
+    href: "https://github.com/Arpit0110Proton/AITalentSense",
+    display: "github.com/Arpit0110Proton/AITalentSense",
   },
   {
     icon: Linkedin,
     label: "LinkedIn",
-    href: "https://linkedin.com/in/arpitsingh",
-    display: "linkedin.com/in/arpitsingh",
+    href: "https://linkedin.com/company/aitalentsense",
+    display: "linkedin.com/company/aitalentsense",
   },
 ];
 
