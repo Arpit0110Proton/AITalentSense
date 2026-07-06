@@ -14,6 +14,9 @@ router.post("/", async (req, res, next) => {
 
     const provider = getProvider();
 
+    // Search for candidates (immediate response — unscored)
+    const candidates = await provider.search(filters, 25);
+
     // Create search_history row
     const { data: row, error: insertErr } = await supabase
       .from("search_history")
@@ -21,8 +24,8 @@ router.post("/", async (req, res, next) => {
         jd_text: jdText,
         filters,
         mode: provider.mode,
-        results: [],
-        candidate_count: 0,
+        results: candidates,
+        candidate_count: candidates.length,
       })
       .select("id")
       .single();
@@ -31,9 +34,6 @@ router.post("/", async (req, res, next) => {
       res.status(500).json({ error: "db_error", message: "Failed to create search record" });
       return;
     }
-
-    // Search for candidates (immediate response — unscored)
-    const candidates = await provider.search(filters, 25);
 
     res.json({
       searchId: row.id,

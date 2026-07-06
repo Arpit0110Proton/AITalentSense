@@ -59,15 +59,24 @@ export default function ResultsPage() {
         setMode(data.mode);
 
         if (data.results && data.results.length > 0) {
-          // Already scored — show directly, no re-scoring
-          const scoredMap = new Map<string, ScoredCandidate>();
-          for (const c of data.results) {
-            scoredMap.set(c.id, c);
-          }
           setCandidates(data.results);
-          setScored(scoredMap);
-          setScoredCount(data.results.length);
-          setScoringComplete(true);
+          
+          // Check if candidates in DB are already scored
+          const hasScores = data.results.every((c) => "score" in c);
+          if (hasScores) {
+            const scoredMap = new Map<string, ScoredCandidate>();
+            for (const c of data.results) {
+              scoredMap.set(c.id, c as ScoredCandidate);
+            }
+            setScored(scoredMap);
+            setScoredCount(data.results.length);
+            setScoringComplete(true);
+          } else {
+            // Not scored yet — set candidates but keep scoringComplete = false
+            setScored(new Map());
+            setScoredCount(0);
+            setScoringComplete(false);
+          }
         } else {
           setCandidates([]);
         }
