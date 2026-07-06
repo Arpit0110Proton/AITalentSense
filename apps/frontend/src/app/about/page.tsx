@@ -46,9 +46,9 @@ export default function AboutPage() {
               How it works
             </h1>
             <p className="font-satoshi text-body-lg text-espresso mb-12">
-              AI Talent Sense is an AI-assisted candidate sourcing tool built as an
-              internship assignment. It turns any job description into scored,
-              ranked candidates — no signup, no paywall.
+              AI Talent Sense is an AI-assisted candidate sourcing tool. It turns
+              any job description into scored, ranked candidates — no signup, no
+              paywall.
             </p>
           </motion.div>
 
