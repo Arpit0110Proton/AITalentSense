@@ -50,11 +50,8 @@ export function Footer() {
             ))}
           </div>
 
-          {/* Column 3: Credits + mode */}
+          {/* Column 3: Mode */}
           <div className="flex flex-col gap-3">
-            <span className="text-label text-sage">
-              BUILT BY ARPIT SINGH · INTERNSHIP ASSIGNMENT · 2026
-            </span>
             {mode && (
               <span
                 className={`inline-flex w-fit items-center gap-1.5 rounded-chip px-3 py-1 text-label ${
