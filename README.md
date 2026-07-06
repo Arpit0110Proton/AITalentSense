@@ -1,4 +1,4 @@
-# AI Talent Sense
+# AI Talent Sense 
 
 AI-assisted candidate sourcing. Paste a job description, get editable search filters, and receive candidates scored 0–100 against your exact requirements — with the reasoning to back it up.
 
