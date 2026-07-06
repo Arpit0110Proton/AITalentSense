@@ -49,9 +49,6 @@ export default function ResultsPage() {
         setFilters(store.filters);
         setMode(store.mode);
         setLoading(false);
-        // Clean up store
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-page data store
-        delete (globalThis as any).__ats_search_store[searchId];
         return;
       }
 
@@ -82,6 +79,14 @@ export default function ResultsPage() {
     };
 
     loadData();
+
+    return () => {
+      // Clean up the store entry when navigating away / unmounting
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-page data store
+      if ((globalThis as any).__ats_search_store) {
+        delete (globalThis as any).__ats_search_store[searchId];
+      }
+    };
   }, [searchId]);
 
   // Progressive scoring — fires after candidates load
