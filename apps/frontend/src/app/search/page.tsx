@@ -47,8 +47,18 @@ function SearchPageContent() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [entryMode, setEntryMode] = useState<EntryMode>("upload");
-  const [jdText, setJdText] = useState("");
-  const [filters, setFilters] = useState<FilterSet | null>(null);
+
+  // Upload tab workspace memory
+  const [uploadFilters, setUploadFilters] = useState<FilterSet | null>(null);
+  const [uploadJdText, setUploadJdText] = useState("");
+
+  // Paste tab workspace memory
+  const [pasteFilters, setPasteFilters] = useState<FilterSet | null>(null);
+  const [pasteJdText, setPasteJdText] = useState("");
+
+  // Manual tab workspace memory
+  const [manualFilters, setManualFilters] = useState<FilterSet | null>(null);
+
   const [parsing, setParsing] = useState(false);
   const [searching, setSearching] = useState(false);
   const [hasEdited, setHasEdited] = useState(false);
@@ -63,11 +73,12 @@ function SearchPageContent() {
     setLoadingEdit(true);
     getSearch(editId)
       .then((data) => {
-        setFilters(data.filters);
-        setJdText(data.jd_text);
         if (data.jd_text && data.jd_text.startsWith("Manual search: ")) {
+          setManualFilters(data.filters);
           setEntryMode("manual");
         } else {
+          setPasteFilters(data.filters);
+          setPasteJdText(data.jd_text);
           setEntryMode("paste");
         }
         // Clean URL query params to prevent reload loop
@@ -84,14 +95,20 @@ function SearchPageContent() {
       });
   }, [searchParams, showToast]);
 
-  const charCount = jdText.length;
+  const charCount = pasteJdText.length;
   const isOverLimit = charCount > 15000;
+
+  // Active filters getter based on the current mode
+  const currentFilters =
+    entryMode === "upload" ? uploadFilters :
+    entryMode === "paste" ? pasteFilters :
+    manualFilters;
 
   // Manual mode search guardrail
   const manualHasMinFilters =
-    (filters?.titles?.length || 0) +
-      (filters?.skills?.length || 0) +
-      (filters?.seniority?.length || 0) >
+    (currentFilters?.titles?.length || 0) +
+      (currentFilters?.skills?.length || 0) +
+      (currentFilters?.seniority?.length || 0) >
     0;
   const searchDisabled =
     searching ||
@@ -108,8 +125,8 @@ function SearchPageContent() {
     const timer = setTimeout(() => setSlowWarn(true), 4000);
 
     try {
-      const result = await parseJd(jdText);
-      setFilters(result.filters);
+      const result = await parseJd(pasteJdText);
+      setPasteFilters(result.filters);
     } catch (err) {
       showToast(
         err instanceof Error ? err.message : "Failed to parse JD",
@@ -123,29 +140,34 @@ function SearchPageContent() {
   };
 
   const handleSearch = async () => {
-    if (!filters) return;
+    if (!currentFilters) return;
     setSearching(true);
     setSlowWarn(false);
     const timer = setTimeout(() => setSlowWarn(true), 4000);
 
-    // Synthesize JD text for manual mode
-    let effectiveJdText = jdText;
-    if (entryMode === "manual" && (!jdText || jdText.startsWith("Manual search: "))) {
+    // Get active JD text to submit based on mode
+    let effectiveJdText = "";
+    if (entryMode === "upload") {
+      effectiveJdText = uploadJdText;
+    } else if (entryMode === "paste") {
+      effectiveJdText = pasteJdText;
+    } else {
+      // Synthesize JD text for manual mode
       const parts: string[] = [];
-      if (filters.titles.length) parts.push(filters.titles.join(", "));
-      if (filters.seniority.length) parts.push(`(${filters.seniority.join("/")})`);
-      if (filters.skills.length) parts.push(`— ${filters.skills.slice(0, 5).join(", ")}`);
-      if (filters.locations.length) parts.push(`in ${filters.locations.join(", ")}`);
+      if (currentFilters.titles.length) parts.push(currentFilters.titles.join(", "));
+      if (currentFilters.seniority.length) parts.push(`(${currentFilters.seniority.join("/")})`);
+      if (currentFilters.skills.length) parts.push(`— ${currentFilters.skills.slice(0, 5).join(", ")}`);
+      if (currentFilters.locations.length) parts.push(`in ${currentFilters.locations.join(", ")}`);
       effectiveJdText = "Manual search: " + (parts.join(" ") || "(no filters set)");
     }
 
     try {
-      const result = await searchCandidates(effectiveJdText, filters);
+      const result = await searchCandidates(effectiveJdText, currentFilters);
       // Store data for results page
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-page data store
       (globalThis as any).__ats_search_store[result.searchId] = {
         candidates: result.candidates,
-        filters,
+        filters: currentFilters,
         mode: result.mode,
         jdText: effectiveJdText,
       };
@@ -165,23 +187,36 @@ function SearchPageContent() {
     if (hasEdited) {
       if (!confirm("You have unsaved filter edits. Start over?")) return;
     }
-    setJdText("");
-    setFilters(null);
+    if (entryMode === "upload") {
+      setUploadFilters(null);
+      setUploadJdText("");
+    } else if (entryMode === "paste") {
+      setPasteFilters(null);
+      setPasteJdText("");
+    } else {
+      setManualFilters(null);
+    }
     setHasEdited(false);
   };
 
   const handleFilterChange = (newFilters: FilterSet) => {
-    setFilters(newFilters);
+    if (entryMode === "upload") {
+      setUploadFilters(newFilters);
+    } else if (entryMode === "paste") {
+      setPasteFilters(newFilters);
+    } else {
+      setManualFilters(newFilters);
+    }
     setHasEdited(true);
   };
 
   const handleUploadExtracted = (extractedFilters: FilterSet, extractedText: string) => {
-    setFilters(extractedFilters);
-    setJdText(extractedText);
+    setUploadFilters(extractedFilters);
+    setUploadJdText(extractedText);
   };
 
   const handleManualStart = () => {
-    setFilters({ ...EMPTY_FILTERS });
+    setManualFilters({ ...EMPTY_FILTERS });
   };
 
   if (loadingEdit) {
@@ -265,8 +300,8 @@ function SearchPageContent() {
                 <div className="relative">
                   <textarea
                     ref={textareaRef}
-                    value={jdText}
-                    onChange={(e) => setJdText(e.target.value)}
+                    value={pasteJdText}
+                    onChange={(e) => setPasteJdText(e.target.value)}
                     readOnly={parsing}
                     placeholder="Paste the full JD — role, requirements, location, everything. The AI reads all of it."
                     className="w-full min-h-[320px] rounded-input border border-tan bg-cream p-5 font-satoshi text-body text-espresso placeholder:text-espresso-60 outline-none resize-y focus:border-olive focus:ring-2 focus:ring-olive focus:ring-offset-2"
@@ -299,7 +334,7 @@ function SearchPageContent() {
             </motion.div>
           )}
 
-          {entryMode === "manual" && !filters && (
+          {entryMode === "manual" && !manualFilters && (
             <motion.div
               key="manual"
               initial={{ opacity: 0 }}
@@ -316,7 +351,7 @@ function SearchPageContent() {
             </motion.div>
           )}
 
-          {entryMode === "manual" && filters && (
+          {entryMode === "manual" && manualFilters && (
             <motion.div
               key="manual-active"
               initial={{ opacity: 0 }}
@@ -329,9 +364,9 @@ function SearchPageContent() {
           )}
         </AnimatePresence>
 
-        {/* Phase 2 — Filter rail (shared across all modes, rendered below the active tab input) */}
+        {/* Phase 2 — Filter rail (specific to the active tab, rendered below its input surface) */}
         <AnimatePresence>
-          {filters && (
+          {currentFilters && (
             <motion.div
               variants={staggerChildren(0.04)}
               initial="hidden"
@@ -349,7 +384,7 @@ function SearchPageContent() {
 
               <motion.div variants={fadeRise}>
                 <FilterChips
-                  filters={filters}
+                  filters={currentFilters}
                   onChange={handleFilterChange}
                 />
               </motion.div>
