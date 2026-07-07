@@ -10,7 +10,6 @@ const PAGE_LINKS = [
   { label: "History", href: "/history" },
   { label: "About", href: "/about" },
   { label: "Privacy & Terms", href: "/privacy" },
-  { label: "Contact", href: "/contact" },
 ];
 
 export function Footer() {

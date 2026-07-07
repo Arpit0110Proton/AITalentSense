@@ -17,7 +17,6 @@ import { Button } from "./Button";
 const NAV_LINKS = [
   { label: "How it works", href: "/about" },
   { label: "History", href: "/history" },
-  { label: "Contact", href: "/contact" },
 ];
 
 export function Nav() {
