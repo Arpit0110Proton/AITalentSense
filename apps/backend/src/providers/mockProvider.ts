@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase.js";
+import { estimateYears } from "../lib/dates.js";
 import type {
   CandidateProfile,
   CandidateProvider,
@@ -90,12 +91,7 @@ function mapSeniority(level: string): Seniority {
   return "mid";
 }
 
-function estimateYears(start?: string, end?: string): number {
-  if (!start) return 1;
-  const s = new Date(start).getFullYear();
-  const e = end ? new Date(end).getFullYear() : new Date().getFullYear();
-  return Math.max(1, e - s);
-}
+
 
 export class MockProvider implements CandidateProvider {
   readonly mode = "mock" as const;

@@ -140,9 +140,9 @@ export async function scoreCandidates(
     const scored = await scoreBatch(batch, filters);
     results.push(...scored);
 
-    // 300ms gap between batches — gentle to free tier
+    // 1500ms gap between batches — required to stay under 8K TPM ceiling on Groq free tier
     if (i + batchSize < candidates.length) {
-      await new Promise((r) => setTimeout(r, 300));
+      await new Promise((r) => setTimeout(r, 1500));
     }
   }
 

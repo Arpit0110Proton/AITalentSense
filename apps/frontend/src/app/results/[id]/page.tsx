@@ -62,7 +62,8 @@ export default function ResultsPage() {
           setCandidates(data.results);
           
           // Check if candidates in DB are already scored
-          const hasScores = data.results.every((c) => "score" in c);
+          const hasScores = data.results.length > 0 &&
+            data.results.every((c: any) => typeof c.score === "number");
           if (hasScores) {
             const scoredMap = new Map<string, ScoredCandidate>();
             for (const c of data.results) {
@@ -293,7 +294,7 @@ export default function ResultsPage() {
         <LayoutGroup>
           <div className="space-y-3">
             {displayList.map((c, i) => {
-              const isScored = "score" in c;
+              const isScored = typeof (c as any).score === "number";
               return (
                 <motion.div key={c.id} layout transition={SPRING_SOFT}>
                   <CandidateCard

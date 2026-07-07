@@ -7,6 +7,7 @@ import type {
   Seniority,
 } from "./types.js";
 import { getCachedProfiles, cacheProfiles } from "../lib/cache.js";
+import { estimateYears } from "../lib/dates.js";
 
 const API_URL = "https://api.crustdata.com/person/search";
 const API_VERSION = "2025-11-01";
@@ -184,7 +185,9 @@ function mapProfile(raw: z.infer<typeof CrustProfileSchema>, index: number): Can
   const skillsRaw = raw.skills?.professional_network_skills || [];
 
   return {
-    id: `crustdata-${index}-${Date.now()}`,
+    id: raw.basic_profile?.linkedin_profile_url
+      ?? (raw as any).crustdata_person_id
+      ?? `crustdata-${index}-${(bp?.name ?? 'unknown').toLowerCase().replace(/\s+/g, '-')}-${(current?.company_name ?? 'unknown').toLowerCase().replace(/\s+/g, '-')}`,
     name: bp?.name || "Unknown",
     headline: bp?.headline || "",
     location: bp?.location?.full_location || "",
@@ -209,12 +212,7 @@ function mapProfile(raw: z.infer<typeof CrustProfileSchema>, index: number): Can
   };
 }
 
-function estimateYears(start?: string, end?: string): number {
-  if (!start) return 1;
-  const s = new Date(start).getFullYear();
-  const e = end ? new Date(end).getFullYear() : new Date().getFullYear();
-  return Math.max(1, e - s);
-}
+
 
 export class CrustDataProvider implements CandidateProvider {
   readonly mode = "live" as const;
@@ -229,7 +227,7 @@ export class CrustDataProvider implements CandidateProvider {
     const cached = await getCachedProfiles(filters);
     if (cached) {
       console.log("[crustdata] cache hit");
-      return cached.map((p, i) => mapProfile(CrustProfileSchema.parse(p), i));
+      return cached.map((p: unknown, i: number) => mapProfile(CrustProfileSchema.parse(p), i));
     }
 
     const body = buildRequestBody(filters, limit);

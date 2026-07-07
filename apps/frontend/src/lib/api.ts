@@ -100,6 +100,7 @@ export function getHistory(limit = 20) {
       mode: "mock" | "live";
       candidateCount: number;
       createdAt: string;
+      jobTitle: string | null;
     }[];
   }>(`/api/history?limit=${limit}`);
 }
@@ -142,3 +143,18 @@ export function warmUpBackend() {
 }
 
 export { BASE };
+
+// FEATURE 2 — Upload JD file (FormData, not JSON)
+export async function parseJdFile(file: File): Promise<{ filters: FilterSet; extractedText: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${BASE}/api/parse-jd-file`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: "Upload failed" }));
+    throw new Error(body.message || `API error ${res.status}`);
+  }
+  return res.json();
+}

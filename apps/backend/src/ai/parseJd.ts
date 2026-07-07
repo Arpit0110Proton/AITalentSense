@@ -2,7 +2,7 @@ import { z } from "zod";
 import { groqParse, GROQ_MODEL } from "./groqClients.js";
 import type { FilterSet } from "../providers/types.js";
 
-const FilterSetSchema = z.object({
+export const FilterSetSchema = z.object({
   titles: z.array(z.string()),
   skills: z.array(z.string()),
   seniority: z.array(z.enum(["junior", "mid", "senior", "lead", "director"])),

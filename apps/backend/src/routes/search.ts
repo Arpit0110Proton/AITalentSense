@@ -17,6 +17,9 @@ router.post("/", async (req, res, next) => {
     // Search for candidates (immediate response — unscored)
     const candidates = await provider.search(filters, 25);
 
+    // FEATURE 1 — populate job_title for grouped history
+    const jobTitle = (filters.titles && filters.titles[0]) || "Manual search";
+
     // Create search_history row
     const { data: row, error: insertErr } = await supabase
       .from("search_history")
@@ -26,6 +29,7 @@ router.post("/", async (req, res, next) => {
         mode: provider.mode,
         results: candidates,
         candidate_count: candidates.length,
+        job_title: jobTitle,
       })
       .select("id")
       .single();

@@ -67,6 +67,24 @@ ai-talent-sense/
 
 The mode is determined once at server boot and never changes at runtime.
 
+## Entry Modes
+
+The `/search` page offers three entry paths:
+- **Upload JD** (default) — drag-and-drop or file picker for PDF / DOCX / TXT files up to 5 MB. The backend extracts text and parses filters via AI.
+- **Paste JD** — paste the job description text directly into a textarea and extract filters via AI.
+- **Manual filters** — skip AI parsing entirely and build search filters by hand.
+
+## Migrations
+
+After running the initial `schema.sql`, apply the following migration in the **Supabase SQL Editor** to enable job-title-grouped history:
+
+```sql
+alter table search_history add column if not exists job_title text;
+create index if not exists idx_history_job_title on search_history (job_title);
+```
+
+> **Note:** This is an additive-only migration. It adds a nullable column and an index — no existing data is affected.
+
 ## Deployment
 
 ### Frontend → Vercel

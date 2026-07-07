@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import healthRouter from "./routes/health.js";
 import parseJdRouter from "./routes/parseJd.js";
+import parseJdFileRouter from "./routes/parseJdFile.js";
 import searchRouter from "./routes/search.js";
 import scoreRouter from "./routes/score.js";
 import historyRouter from "./routes/history.js";
@@ -52,6 +53,7 @@ app.use((req, _res, next) => {
 // --- Routes ---
 app.use("/health", healthRouter);
 app.use("/api/parse-jd", parseJdRouter);
+app.use("/api/parse-jd-file", parseJdFileRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/score", scoreRouter);
 app.use("/api/history", historyRouter);

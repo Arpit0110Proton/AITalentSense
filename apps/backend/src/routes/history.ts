@@ -9,7 +9,7 @@ router.get("/", async (req, res, next) => {
     const limit = Math.min(50, parseInt(String(req.query.limit || "20"), 10));
     const { data, error } = await supabase
       .from("search_history")
-      .select("id, jd_text, filters, mode, candidate_count, created_at")
+      .select("id, jd_text, filters, mode, candidate_count, created_at, job_title")
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -25,6 +25,7 @@ router.get("/", async (req, res, next) => {
       mode: row.mode,
       candidateCount: row.candidate_count,
       createdAt: row.created_at,
+      jobTitle: (row.job_title as string | null) || null,
     }));
 
     res.json({ searches });
