@@ -136,13 +136,22 @@ const CrustProfileSchema = z
         employment_details: z
           .object({
             current: z
-              .object({
-                title: z.string().optional(),
-                company_name: z.string().optional(),
-                seniority_level: z.string().optional(),
-                industry: z.string().optional(),
-              })
-              .passthrough()
+              .union([
+                z.object({
+                  title: z.string().optional(),
+                  company_name: z.string().optional(),
+                  seniority_level: z.string().optional(),
+                  industry: z.string().optional(),
+                }).passthrough(),
+                z.array(
+                  z.object({
+                    title: z.string().optional(),
+                    company_name: z.string().optional(),
+                    seniority_level: z.string().optional(),
+                    industry: z.string().optional(),
+                  }).passthrough()
+                )
+              ])
               .optional(),
             past: z.array(z.object({
               title: z.string().optional(),
@@ -179,7 +188,8 @@ const CrustProfileSchema = z
 function mapProfile(raw: z.infer<typeof CrustProfileSchema>, index: number): CandidateProfile {
   const bp = raw.basic_profile;
   const exp = raw.experience?.employment_details;
-  const current = exp?.current;
+  const rawCurrent = exp?.current;
+  const current = Array.isArray(rawCurrent) ? rawCurrent[0] : rawCurrent;
   const pastRaw = exp?.past || [];
   const eduRaw = raw.education?.schools || [];
   const skillsRaw = raw.skills?.professional_network_skills || [];
