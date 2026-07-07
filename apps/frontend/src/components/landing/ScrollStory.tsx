@@ -7,8 +7,8 @@ import { FileText, Sliders, Users } from "lucide-react";
 const STEPS = [
   {
     icon: FileText,
-    title: "Paste a JD",
-    body: "Drop the full job description — the AI reads role, skills, seniority, location, everything.",
+    title: "Define the role",
+    body: "Upload a JD, paste the description, or build filters manually. The AI extracts role, skills, seniority, and location automatically.",
     chips: ["React", "Senior", "5+ yrs", "Bengaluru"],
   },
   {

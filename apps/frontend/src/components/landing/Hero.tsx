@@ -85,7 +85,7 @@ export function Hero() {
     mouseY.set(0);
   };
 
-  const words = ["Paste", "a", "JD.", "Meet", "your", "shortlist."];
+  const words = ["Define", "the", "role.", "Meet", "your", "shortlist."];
 
   return (
     <section
