@@ -176,6 +176,9 @@ export function JdUploader({ onExtracted }: JdUploaderProps) {
             <p className="font-satoshi text-small text-espresso-60">
               Up to 5 MB.
             </p>
+            <p className="font-satoshi text-[12px] text-espresso-60 italic text-center px-4 max-w-[280px]">
+              Note: If your file contains less than 25 characters, please use the Paste JD tab instead.
+            </p>
           </motion.div>
         )}
       </AnimatePresence>

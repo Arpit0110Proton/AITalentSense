@@ -64,11 +64,11 @@ router.post("/", upload.single("file"), async (req, res, next) => {
 
     extractedText = extractedText.trim();
 
-    if (extractedText.length < 100) {
+    if (extractedText.length < 25) {
       res.status(422).json({
         error: "extraction_too_short",
         message:
-          "Couldn't read enough text from this file. Try pasting the text instead.",
+          "Couldn't read enough text from this file (minimum 25 characters required). Try pasting the text instead.",
       });
       return;
     }
