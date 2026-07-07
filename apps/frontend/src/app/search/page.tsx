@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { EASE_OUT_EXPO, SPRING_SNAPPY, fadeRise, staggerChildren } from "@/lib/motion";
@@ -9,7 +9,7 @@ import { Button } from "@/components/shared/Button";
 import { FilterChips } from "@/components/app/FilterChips";
 import { JdUploader } from "@/components/app/JdUploader";
 import { useToast } from "@/components/shared/Toast";
-import { parseJd, searchCandidates } from "@/lib/api";
+import { parseJd, searchCandidates, getSearch } from "@/lib/api";
 import type { FilterSet } from "@/lib/api";
 
 // Module-level store for passing data to results page without refetch
@@ -40,8 +40,9 @@ const EMPTY_FILTERS: FilterSet = {
   maxYears: null,
 };
 
-export default function SearchPage() {
+function SearchPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -52,6 +53,36 @@ export default function SearchPage() {
   const [searching, setSearching] = useState(false);
   const [hasEdited, setHasEdited] = useState(false);
   const [slowWarn, setSlowWarn] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(false);
+
+  // Pre-load search for editing if 'edit' query param is present
+  useEffect(() => {
+    const editId = searchParams.get("edit");
+    if (!editId) return;
+
+    setLoadingEdit(true);
+    getSearch(editId)
+      .then((data) => {
+        setFilters(data.filters);
+        setJdText(data.jd_text);
+        if (data.jd_text && data.jd_text.startsWith("Manual search: ")) {
+          setEntryMode("manual");
+        } else {
+          setEntryMode("paste");
+        }
+        // Clean URL query params to prevent reload loop
+        window.history.replaceState(null, "", "/search");
+      })
+      .catch((err) => {
+        showToast(
+          err instanceof Error ? err.message : "Failed to load existing search filters",
+          "error"
+        );
+      })
+      .finally(() => {
+        setLoadingEdit(false);
+      });
+  }, [searchParams, showToast]);
 
   const charCount = jdText.length;
   const isOverLimit = charCount > 15000;
@@ -99,7 +130,7 @@ export default function SearchPage() {
 
     // Synthesize JD text for manual mode
     let effectiveJdText = jdText;
-    if (entryMode === "manual" && !jdText) {
+    if (entryMode === "manual" && (!jdText || jdText.startsWith("Manual search: "))) {
       const parts: string[] = [];
       if (filters.titles.length) parts.push(filters.titles.join(", "));
       if (filters.seniority.length) parts.push(`(${filters.seniority.join("/")})`);
@@ -153,6 +184,18 @@ export default function SearchPage() {
     setFilters({ ...EMPTY_FILTERS });
   };
 
+  if (loadingEdit) {
+    return (
+      <div className="min-h-screen bg-cream pt-24">
+        <div className="mx-auto max-w-app px-6 py-app-desktop text-center">
+          <div className="animate-pulse font-satoshi text-body text-espresso-60">
+            Loading existing search filters…
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-cream pt-24">
       <div className="mx-auto max-w-app px-6 py-app-desktop">
@@ -194,9 +237,9 @@ export default function SearchPage() {
           )}
         </AnimatePresence>
 
-        {/* Entry surface — tab content with fade transition */}
+        {/* Entry surface — active tab input surface */}
         <AnimatePresence mode="wait">
-          {entryMode === "upload" && !filters && (
+          {entryMode === "upload" && (
             <motion.div
               key="upload"
               initial={{ opacity: 0 }}
@@ -208,7 +251,7 @@ export default function SearchPage() {
             </motion.div>
           )}
 
-          {entryMode === "paste" && !filters && (
+          {entryMode === "paste" && (
             <motion.div
               key="paste"
               initial={{ opacity: 0 }}
@@ -272,16 +315,28 @@ export default function SearchPage() {
               </Button>
             </motion.div>
           )}
+
+          {entryMode === "manual" && filters && (
+            <motion.div
+              key="manual-active"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="font-satoshi text-small text-espresso-60"
+            >
+              Manual filters active. Add or edit chips below, or click Start Over.
+            </motion.div>
+          )}
         </AnimatePresence>
 
-        {/* Phase 2 — Filter rail (shared across all modes) */}
+        {/* Phase 2 — Filter rail (shared across all modes, rendered below the active tab input) */}
         <AnimatePresence>
           {filters && (
             <motion.div
               variants={staggerChildren(0.04)}
               initial="hidden"
               animate="visible"
-              className="mt-8"
+              className="mt-8 border-t border-tan-40 pt-8"
             >
               <motion.div variants={fadeRise}>
                 <div className="eyebrow text-espresso mb-2">FILTERS</div>
@@ -330,5 +385,19 @@ export default function SearchPage() {
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-cream pt-24 text-center">
+        <div className="animate-pulse font-satoshi text-body text-espresso-60">
+          Loading search…
+        </div>
+      </div>
+    }>
+      <SearchPageContent />
+    </Suspense>
   );
 }

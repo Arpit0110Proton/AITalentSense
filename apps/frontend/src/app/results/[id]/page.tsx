@@ -250,7 +250,7 @@ export default function ResultsPage() {
               </div>
             )}
             <Link
-              href="/search"
+              href={`/search?edit=${searchId}`}
               className="font-satoshi text-small text-olive ml-2"
             >
               Edit filters
