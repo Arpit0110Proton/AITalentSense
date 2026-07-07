@@ -60,6 +60,60 @@ const SKILL_GROUPS: string[][] = [
   ["git", "github", "gitlab", "bitbucket", "version control"],
   // Monitoring
   ["monitoring", "observability", "datadog", "new relic", "prometheus", "grafana", "splunk", "elk", "logging"],
+  // ── New domain groups ──
+  // Embedded / Firmware / IoT
+  ["embedded", "embedded systems", "firmware", "firmware development", "embedded c", "microcontrollers", "mcu"],
+  ["stm32", "stm32cube", "cubemx", "stm32cubemx", "st hal and ll drivers", "arm cortex", "arm"],
+  ["rtos", "freertos", "real-time operating systems", "zephyr", "vxworks"],
+  ["ble", "bluetooth low energy", "bluetooth", "ble protocols", "zigbee", "lora", "wireless protocols"],
+  ["i2c", "spi", "uart", "i2c/spi/uart", "serial communication", "can bus", "modbus"],
+  ["iot", "internet of things", "mqtt", "coap", "iot protocols"],
+  // Hardware / VLSI / PCB
+  ["fpga", "verilog", "systemverilog", "rtl design", "rtl", "hdl"],
+  ["vlsi", "vlsi design", "asic", "asic design", "chip design", "semiconductor"],
+  ["pcb design", "pcb", "altium designer", "altium", "kicad", "eagle", "pcb layout"],
+  ["cadence", "synopsys", "eda tools", "eda", "timing analysis", "signal integrity"],
+  // Mechanical Engineering
+  ["solidworks", "cad", "autocad", "catia", "creo", "inventor", "onshape", "mechanical design"],
+  ["ansys", "fea", "finite element analysis", "cfd", "computational fluid dynamics", "simulation"],
+  ["cnc machining", "cnc", "manufacturing processes", "manufacturing", "3d printing", "additive manufacturing"],
+  ["gd&t", "geometric dimensioning", "tolerance analysis", "tolerancing"],
+  ["six sigma", "lean", "lean manufacturing", "kaizen", "quality engineering"],
+  // Civil / Construction
+  ["revit", "bim", "building information modeling", "archicad"],
+  ["structural analysis", "staad pro", "staad", "etabs", "sap2000", "structural engineering"],
+  ["construction management", "primavera", "p6", "project planning", "site management"],
+  ["concrete design", "steel structures", "reinforced concrete", "structural design"],
+  // Biotech / Pharma
+  ["molecular biology", "cell culture", "pcr", "dna", "rna", "genomics", "proteomics"],
+  ["hplc", "mass spectrometry", "chromatography", "analytical chemistry"],
+  ["clinical trials", "gmp", "good manufacturing practice", "fda compliance", "fda", "regulatory affairs"],
+  ["bioinformatics", "computational biology", "protein engineering", "crispr", "gene editing"],
+  ["drug discovery", "pharmacology", "pharmaceutical", "drug development", "clinical research"],
+  // Finance / Accounting
+  ["financial modeling", "financial analysis", "corporate finance", "fp&a", "financial planning"],
+  ["accounting", "gaap", "ifrs", "gaap/ifrs", "bookkeeping", "general ledger"],
+  ["auditing", "tax compliance", "tax", "internal audit", "external audit"],
+  ["sap", "tally", "quickbooks", "erp", "oracle financials", "netsuite"],
+  // Supply Chain / Operations
+  ["procurement", "vendor management", "sourcing", "purchase management"],
+  ["inventory management", "warehouse management", "wms", "logistics", "demand planning"],
+  ["supply chain analytics", "supply chain", "scm", "sap scm", "oracle scm"],
+  // Content / Media
+  ["adobe premiere", "premiere pro", "final cut pro", "davinci resolve", "video editing", "video production"],
+  ["after effects", "motion graphics", "animation", "visual effects", "vfx"],
+  ["journalism", "copyediting", "scriptwriting", "content writing", "editorial"],
+  ["photography", "videography", "cinematography", "camera operation"],
+  // Customer Success
+  ["customer relationship management", "crm", "salesforce crm", "hubspot"],
+  ["zendesk", "intercom", "freshdesk", "customer support", "helpdesk"],
+  ["csat", "nps", "csat/nps", "customer satisfaction", "net promoter score"],
+  ["retention strategies", "churn prevention", "customer retention", "upselling", "cross-selling"],
+  // Cloud Architecture
+  ["solutions architecture", "enterprise architecture", "togaf", "cloud architecture"],
+  ["cloud migration", "cloud strategy", "multi-cloud", "multi-cloud strategy", "hybrid cloud"],
+  ["serverless", "lambda", "aws lambda", "cloud functions", "azure functions"],
+  ["cost optimization", "finops", "cloud cost management", "cloud governance"],
 ];
 
 // Build a lookup: lowercase skill → group index

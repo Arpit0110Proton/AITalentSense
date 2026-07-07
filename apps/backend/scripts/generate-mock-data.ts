@@ -17,7 +17,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-const rng = seedrandom("ai-talent-sense-v2");
+const rng = seedrandom("ai-talent-sense-v3");
 function rand(min: number, max: number): number {
   return Math.floor(rng() * (max - min + 1)) + min;
 }
@@ -37,6 +37,8 @@ const FIRST_NAMES = [
   "Alex","Ben","Chris","Daniel","Ethan","Felix","Gabriel","Henry","Ivan","James",
   "Kevin","Liam","Marcus","Noah","Oliver","Amelia","Beatrice","Chloe","Elena","Fiona",
   "Grace","Hannah","Isla","Julia","Katherine","Lena","Maria","Nadia","Olivia","Sofia",
+  "Vikram","Deepak","Suresh","Rajesh","Manish","Swati","Divya","Kritika","Tanvi","Harini",
+  "Raghav","Pranav","Akash","Chirag","Yash","Sneha","Sakshi","Ankita","Pallavi","Ritika",
 ];
 const LAST_NAMES = [
   "Sharma","Verma","Gupta","Mehta","Iyer","Nair","Reddy","Rao","Patel","Shah",
@@ -45,9 +47,10 @@ const LAST_NAMES = [
   "Smith","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis","Martinez","Anderson",
   "Taylor","Thomas","Moore","Jackson","Martin","Lee","Thompson","White","Harris","Clark",
   "Lewis","Walker","Hall","Young","King","Wright","Scott","Green","Baker","Nelson",
+  "Agarwal","Saxena","Tiwari","Chauhan","Srivastava","Rastogi","Dubey","Goyal","Arora","Bhatia",
 ];
 
-// 15 Role families (10 original + 5 MNC corporate families)
+// 25 Role families (15 original + 10 new domain families)
 type RoleFamily =
   | "frontend"
   | "backend"
@@ -63,7 +66,18 @@ type RoleFamily =
   | "marketing"
   | "legal"
   | "cybersecurity"
-  | "hr";
+  | "hr"
+  // ── 10 new families ──
+  | "embedded"
+  | "hardware"
+  | "mechanical"
+  | "civil-construction"
+  | "biotech-pharma"
+  | "finance-accounting"
+  | "supply-chain"
+  | "content-media"
+  | "customer-success"
+  | "cloud-architecture";
 
 const ROLE_FAMILIES: RoleFamily[] = [
   "frontend",
@@ -81,7 +95,29 @@ const ROLE_FAMILIES: RoleFamily[] = [
   "legal",
   "cybersecurity",
   "hr",
+  // ── 10 new ──
+  "embedded",
+  "hardware",
+  "mechanical",
+  "civil-construction",
+  "biotech-pharma",
+  "finance-accounting",
+  "supply-chain",
+  "content-media",
+  "customer-success",
+  "cloud-architecture",
 ];
+
+// Profile counts per family: original 15 × 100 + new 10 × 50 = 2000
+const FAMILY_COUNTS: Record<RoleFamily, number> = {
+  frontend: 100, backend: 100, fullstack: 100, "data-science": 100,
+  "ml-engineering": 100, "devops-sre": 100, mobile: 100,
+  "product-management": 100, design: 100, qa: 100,
+  sales: 100, marketing: 100, legal: 100, cybersecurity: 100, hr: 100,
+  embedded: 50, hardware: 50, mechanical: 50, "civil-construction": 50,
+  "biotech-pharma": 50, "finance-accounting": 50, "supply-chain": 50,
+  "content-media": 50, "customer-success": 50, "cloud-architecture": 50,
+};
 
 type Seniority = "junior" | "mid" | "senior" | "lead" | "director";
 
@@ -102,6 +138,17 @@ const SKILLS: Record<RoleFamily, string[]> = {
   legal: ["Contract Negotiation", "Corporate Law", "Intellectual Property", "Compliance", "Risk Management", "Legal Research", "GDPR", "Litigation", "M&A", "Employment Law"],
   cybersecurity: ["Network Security", "Penetration Testing", "Vulnerability Assessment", "SIEM", "Incident Response", "Firewalls", "Identity Access Management", "Encryption", "OWASP", "Threat Hunting", "ISO 27001"],
   hr: ["Talent Acquisition", "Technical Recruiting", "Employee Relations", "Performance Management", "Onboarding", "HR Policies", "HRIS", "Compensation & Benefits", "Employer Branding", "Conflict Resolution"],
+  // ── 10 new families ──
+  embedded: ["C", "C++", "STM32", "RTOS", "BLE", "Embedded C", "Microcontrollers", "ARM Cortex", "I2C/SPI/UART", "CubeMX", "FreeRTOS", "IoT", "Firmware Development", "Debugging", "Oscilloscope", "PCB Bring-up"],
+  hardware: ["FPGA", "Verilog", "SystemVerilog", "VLSI Design", "PCB Design", "ASIC Design", "Cadence", "Synopsys", "Timing Analysis", "RTL Design", "EDA Tools", "Signal Integrity", "Altium Designer", "KiCad"],
+  mechanical: ["SolidWorks", "AutoCAD", "ANSYS", "CATIA", "GD&T", "FEA", "CFD", "3D Printing", "Manufacturing Processes", "Thermal Analysis", "CNC Machining", "Six Sigma", "Creo", "Tolerance Analysis"],
+  "civil-construction": ["AutoCAD", "Revit", "BIM", "Structural Analysis", "STAAD Pro", "Project Management", "Construction Management", "Surveying", "ETABS", "Primavera", "Concrete Design", "Steel Structures"],
+  "biotech-pharma": ["Molecular Biology", "Cell Culture", "PCR", "HPLC", "GMP", "Clinical Trials", "Drug Discovery", "Bioinformatics", "Genomics", "Regulatory Affairs", "FDA Compliance", "Protein Engineering", "CRISPR", "Pharmacology"],
+  "finance-accounting": ["Financial Modeling", "Excel", "SAP", "Accounting", "Tax Compliance", "FP&A", "Auditing", "GAAP/IFRS", "Tally", "QuickBooks", "Risk Analysis", "Budgeting", "Power BI", "Corporate Finance"],
+  "supply-chain": ["Procurement", "SAP SCM", "Inventory Management", "Demand Planning", "Logistics", "ERP", "Warehouse Management", "Lean Manufacturing", "Vendor Management", "Oracle SCM", "Supply Chain Analytics", "Quality Control"],
+  "content-media": ["Adobe Premiere", "Final Cut Pro", "Video Production", "Content Strategy", "Scriptwriting", "Photography", "After Effects", "Podcasting", "Social Media Management", "Journalism", "Copyediting", "DaVinci Resolve"],
+  "customer-success": ["Customer Relationship Management", "Zendesk", "Intercom", "Onboarding", "Retention Strategies", "Account Management", "SLA Management", "Customer Analytics", "Churn Prevention", "Upselling", "Salesforce", "CSAT/NPS"],
+  "cloud-architecture": ["AWS", "Azure", "GCP", "Solutions Architecture", "Cloud Migration", "Terraform", "Kubernetes", "Microservices Architecture", "Enterprise Architecture", "TOGAF", "Serverless", "Cloud Security", "Cost Optimization", "Multi-Cloud Strategy"],
 };
 
 // Companies
@@ -154,6 +201,22 @@ const COMPANIES: { name: string; industry: string }[] = [
   { name: "Skillbridge", industry: "EdTech" },
   { name: "Carepoint", industry: "Healthtech" },
   { name: "Storefrontly", industry: "E-commerce" },
+  // ── 15 new companies for new domains ──
+  { name: "Str8bat", industry: "Sports Technology" },
+  { name: "NanoCore", industry: "Semiconductors" },
+  { name: "FirmaTech", industry: "IoT" },
+  { name: "BridgeBuild", industry: "Construction" },
+  { name: "PharmaVerse", industry: "Pharmaceuticals" },
+  { name: "CapitalEdge", industry: "Financial Services" },
+  { name: "SupplyChainX", industry: "Supply Chain" },
+  { name: "MediaPulse", industry: "Media & Entertainment" },
+  { name: "SuccessHub", industry: "SaaS" },
+  { name: "CloudPeak", industry: "Cloud Solutions" },
+  { name: "RoboSense", industry: "Robotics" },
+  { name: "AeroNova", industry: "Aerospace" },
+  { name: "BioGenix", industry: "Biotechnology" },
+  { name: "GreenGrid", industry: "Renewable Energy" },
+  { name: "PrecisionMfg", industry: "Manufacturing" },
 ];
 
 // Education
@@ -165,8 +228,14 @@ const INSTITUTIONS = [
 ];
 const DEGREES_TECH = ["B.Tech CSE","B.E. IT","B.Sc CS","M.Tech","MS CS"];
 const DEGREES_NON_TECH = ["BBA", "MBA", "B.Com", "BA Communications", "B.Sc Finance", "BA Marketing"];
+const DEGREES_ENGINEERING = ["B.E. ECE", "B.E. EEE", "B.Tech ECE", "M.Tech VLSI", "M.Tech Embedded Systems", "B.E. Electronics"];
+const DEGREES_MECHANICAL = ["B.E. Mechanical", "B.Tech Mechanical", "M.Tech Thermal", "M.E. Manufacturing", "B.Tech Production"];
+const DEGREES_CIVIL = ["B.E. Civil", "B.Tech Civil", "M.Tech Structural", "M.E. Construction Management"];
+const DEGREES_SCIENCE = ["B.Sc Biology", "M.Sc Biotechnology", "B.Pharm", "M.Pharm", "PhD Biochemistry", "M.Sc Molecular Biology"];
+const DEGREES_FINANCE = ["B.Com", "CA", "CFA Level III", "MBA Finance", "M.Com", "CPA"];
+const DEGREES_MEDIA = ["BA Journalism", "BA Film Studies", "BFA Visual Arts", "MA Mass Communication", "BA Media Studies"];
 
-// Role titles: 15 families × 5 seniority bands
+// Role titles: 25 families × 5 seniority bands
 const ROLE_TITLES: Record<RoleFamily, Record<Seniority, string>> = {
   frontend:             { junior: "Frontend Developer",     mid: "Frontend Engineer",       senior: "Senior Frontend Engineer",     lead: "Staff Frontend Engineer",       director: "Director of Frontend Engineering" },
   backend:              { junior: "Backend Developer",      mid: "Backend Engineer",        senior: "Senior Backend Engineer",      lead: "Staff Backend Engineer",        director: "Director of Backend Engineering" },
@@ -183,6 +252,17 @@ const ROLE_TITLES: Record<RoleFamily, Record<Seniority, string>> = {
   legal:                { junior: "Legal Intern",           mid: "Legal Counsel",           senior: "Senior Legal Counsel",         lead: "Head of Legal & Compliance",    director: "General Counsel" },
   cybersecurity:        { junior: "Security Analyst",       mid: "Security Engineer",       senior: "Senior Security Engineer",     lead: "Security Architect",            director: "Chief Info Security Officer" },
   hr:                   { junior: "HR Coordinator",         mid: "HR Specialist / Recruiter", senior: "Senior HR Manager",          lead: "Head of People Operations",      director: "VP of People & Talent" },
+  // ── 10 new families ──
+  embedded:             { junior: "Embedded Developer",     mid: "Embedded Engineer",       senior: "Senior Embedded Engineer",     lead: "Lead Firmware Engineer",        director: "Director of Embedded Systems" },
+  hardware:             { junior: "Hardware Design Intern", mid: "Hardware Engineer",       senior: "Senior Hardware Engineer",     lead: "Lead VLSI Engineer",            director: "Director of Hardware Engineering" },
+  mechanical:           { junior: "Junior Mechanical Engr", mid: "Mechanical Engineer",     senior: "Senior Mechanical Engineer",   lead: "Lead Mechanical Engineer",      director: "Director of Mechanical Engineering" },
+  "civil-construction": { junior: "Junior Civil Engineer",  mid: "Civil Engineer",          senior: "Senior Structural Engineer",   lead: "Lead Construction Manager",     director: "Director of Construction" },
+  "biotech-pharma":     { junior: "Research Associate",     mid: "Biotech Researcher",      senior: "Senior Research Scientist",    lead: "Principal Scientist",           director: "Director of R&D" },
+  "finance-accounting": { junior: "Junior Accountant",      mid: "Financial Analyst",       senior: "Senior Financial Analyst",     lead: "Finance Manager",               director: "VP of Finance" },
+  "supply-chain":       { junior: "Supply Chain Analyst",   mid: "Procurement Specialist",  senior: "Senior Supply Chain Mgr",      lead: "Head of Procurement",           director: "VP of Supply Chain" },
+  "content-media":      { junior: "Content Intern",         mid: "Content Producer",        senior: "Senior Video Editor",          lead: "Head of Content",               director: "VP of Content & Media" },
+  "customer-success":   { junior: "Customer Support Rep",   mid: "Customer Success Mgr",    senior: "Senior CSM",                   lead: "Head of Customer Success",      director: "VP of Customer Experience" },
+  "cloud-architecture": { junior: "Cloud Engineer",         mid: "Cloud Solutions Architect",senior: "Senior Solutions Architect",   lead: "Principal Architect",            director: "VP of Cloud Architecture" },
 };
 
 // Seniority label for CrustData format
@@ -191,7 +271,7 @@ const SENIORITY_LABELS: Record<Seniority, string> = {
 };
 
 // Summary templates
-const VALUES = ["performance","accessibility","design systems","developer experience","clean architecture","mentoring","shipping fast","data-driven decisions","compliance","security-first","scalability","growth enablement","brand awareness","deal closing"];
+const VALUES = ["performance","accessibility","design systems","developer experience","clean architecture","mentoring","shipping fast","data-driven decisions","compliance","security-first","scalability","growth enablement","brand awareness","deal closing","reliability","precision","safety","innovation","quality"];
 const SUMMARY_TEMPLATES: Record<RoleFamily, string[]> = {
   frontend: [
     "{title} with {n} years building {skill1}-heavy products in {industry}. Previously at {pastCompany}. Cares about {value}.",
@@ -260,6 +340,57 @@ const SUMMARY_TEMPLATES: Record<RoleFamily, string[]> = {
     "People operations partner with {n} years building high-retention corporate cultures. Expert in {skill1}.",
     "{title} with {n} years of experience in global recruiting, talent strategies, and {skill1}.",
     "Managing employee relations and {skill1} for {n} years. Focused on {value}.",
+  ],
+  // ── 10 new families ──
+  embedded: [
+    "Embedded firmware engineer with {n} years developing {skill1}-based systems. Deep experience with {skill2} and real-time protocols. Industry: {industry}.",
+    "{title} with {n} years writing firmware for {skill1} microcontrollers. Expert in {skill2} and low-level debugging.",
+    "IoT/embedded specialist with {n}+ years. Core: {skill1}, {skill2}. Passionate about {value}. Previously at {pastCompany}.",
+  ],
+  hardware: [
+    "Hardware engineer with {n} years in {skill1} and chip design. Core tools: {skill2}, {skill1}. Industry: {industry}.",
+    "{title} with {n} years designing digital circuits. Expert in {skill1} and {skill2}. Values {value}.",
+    "VLSI/FPGA specialist with {n}+ years across {industry}. Deep in {skill1}. Previously at {pastCompany}.",
+  ],
+  mechanical: [
+    "Mechanical engineer with {n} years designing products using {skill1} and {skill2}. Industry: {industry}.",
+    "{title} with {n} years in product design and manufacturing. Expert in {skill1}. Cares about {value}.",
+    "Design and simulation specialist with {n}+ years. Core: {skill1}, {skill2}. Previously at {pastCompany}.",
+  ],
+  "civil-construction": [
+    "Civil/structural engineer with {n} years in {industry}. Core tools: {skill1}, {skill2}.",
+    "{title} with {n} years managing construction projects. Expert in {skill1} and {skill2}. Values {value}.",
+    "Infrastructure specialist with {n}+ years across commercial and residential projects. Deep in {skill1}.",
+  ],
+  "biotech-pharma": [
+    "Biotech researcher with {n} years in {skill1} and {skill2}. Industry: {industry}. Focused on {value}.",
+    "{title} with {n} years in drug discovery and development. Expert in {skill1}. Previously at {pastCompany}.",
+    "Life sciences professional with {n}+ years. Core: {skill1}, {skill2}. Passionate about {value}.",
+  ],
+  "finance-accounting": [
+    "Finance professional with {n} years in {skill1} and {skill2}. Industry: {industry}.",
+    "{title} with {n} years managing budgets and forecasts. Expert in {skill1}. Values {value}.",
+    "Accounting specialist with {n}+ years. Core: {skill1}, {skill2}. Previously at {pastCompany}.",
+  ],
+  "supply-chain": [
+    "Supply chain leader with {n} years optimizing {skill1} and {skill2}. Industry: {industry}.",
+    "{title} with {n} years streamlining procurement and logistics. Expert in {skill1}. Values {value}.",
+    "Operations specialist with {n}+ years across {industry}. Deep in {skill1} and {skill2}.",
+  ],
+  "content-media": [
+    "Content creator with {n} years in {skill1} and {skill2}. Industry: {industry}. Focused on {value}.",
+    "{title} with {n} years producing engaging media. Expert in {skill1}. Previously at {pastCompany}.",
+    "Media professional with {n}+ years. Core: {skill1}, {skill2}. Passionate about {value}.",
+  ],
+  "customer-success": [
+    "Customer success professional with {n} years driving retention and growth. Core: {skill1}, {skill2}. Industry: {industry}.",
+    "{title} with {n} years managing enterprise accounts. Expert in {skill1}. Values {value}.",
+    "Client relations specialist with {n}+ years. Deep in {skill1} and {skill2}. Previously at {pastCompany}.",
+  ],
+  "cloud-architecture": [
+    "Cloud architect with {n} years designing enterprise-grade {skill1} and {skill2} solutions. Industry: {industry}.",
+    "{title} with {n} years leading cloud migration and optimization. Expert in {skill1}. Values {value}.",
+    "Solutions architect with {n}+ years. Core: {skill1}, {skill2}. Passionate about {value}. Previously at {pastCompany}.",
   ],
 };
 
@@ -391,9 +522,44 @@ function generateSummary(
     .replace("{value}", value);
 }
 
+// Degree selection based on family
+function pickDegree(family: RoleFamily): string {
+  switch (family) {
+    case "embedded":
+    case "hardware":
+      return pick(DEGREES_ENGINEERING);
+    case "mechanical":
+      return pick(DEGREES_MECHANICAL);
+    case "civil-construction":
+      return pick(DEGREES_CIVIL);
+    case "biotech-pharma":
+      return pick(DEGREES_SCIENCE);
+    case "finance-accounting":
+      return pick(DEGREES_FINANCE);
+    case "content-media":
+      return pick(DEGREES_MEDIA);
+    case "legal":
+      return pick(["LLB", "LLM", "Juris Doctor"]);
+    case "frontend":
+    case "backend":
+    case "fullstack":
+    case "data-science":
+    case "ml-engineering":
+    case "devops-sre":
+    case "mobile":
+    case "qa":
+    case "cybersecurity":
+    case "cloud-architecture":
+      return pick(DEGREES_TECH);
+    default:
+      return pick(DEGREES_NON_TECH);
+  }
+}
+
 // Main generation
 async function main() {
-  console.log("🌱 Seeding 1,500 mock_profiles (MNC corporate roles)...\n");
+  const totalExpected = Object.values(FAMILY_COUNTS).reduce((a, b) => a + b, 0);
+  console.log(`🌱 Seeding ${totalExpected.toLocaleString()} mock_profiles (25 role families)...\n`);
 
   // Truncate
   const { error: truncErr } = await supabase
@@ -409,9 +575,9 @@ async function main() {
   const allRows: Record<string, unknown>[] = [];
   const currentYear = new Date().getFullYear();
 
-  // Generate 100 profiles per family × 15 families = 1,500 profiles (original 750 + 750 additional)
   for (const family of ROLE_FAMILIES) {
-    for (let i = 0; i < 100; i++) {
+    const count = FAMILY_COUNTS[family];
+    for (let i = 0; i < count; i++) {
       let first: string, last: string, fullName: string;
       let attempts = 0;
       do {
@@ -434,28 +600,8 @@ async function main() {
       const pastCompany = pastRoles.length > 0 ? pastRoles[0].company : undefined;
       const summary = generateSummary(family, title, yoe, skills, currentCompanyObj.name, pastCompany, currentCompanyObj.industry);
 
-      // Select education based on domain type
-      const isTech = [
-        "frontend",
-        "backend",
-        "fullstack",
-        "data-science",
-        "ml-engineering",
-        "devops-sre",
-        "mobile",
-        "qa",
-        "cybersecurity",
-      ].includes(family);
-
       const school = pick(INSTITUTIONS);
-      let degree = "";
-      if (family === "legal") {
-        degree = pick(["LLB", "LLM", "Juris Doctor"]);
-      } else if (isTech) {
-        degree = pick(DEGREES_TECH);
-      } else {
-        degree = pick(DEGREES_NON_TECH);
-      }
+      const degree = pickDegree(family);
 
       const gradYear = currentYear - yoe - rand(0, 2);
       const connectionCount = rand(120, 3200);
@@ -530,16 +676,17 @@ async function main() {
     .from("mock_profiles")
     .select("*", { count: "exact", head: true });
   console.log(`  Total rows: ${total}`);
-  if (total !== 1500) { console.error("  ❌ Expected 1500 rows"); process.exit(1); }
+  if (total !== totalExpected) { console.error(`  ❌ Expected ${totalExpected} rows`); process.exit(1); }
 
   // Count per role family
   for (const family of ROLE_FAMILIES) {
+    const expected = FAMILY_COUNTS[family];
     const { count } = await supabase
       .from("mock_profiles")
       .select("*", { count: "exact", head: true })
       .eq("role_family", family);
     console.log(`  ${family}: ${count}`);
-    if (count !== 100) { console.error(`  ❌ Expected 100 for ${family}`); process.exit(1); }
+    if (count !== expected) { console.error(`  ❌ Expected ${expected} for ${family}`); process.exit(1); }
   }
 
   // Count per seniority
@@ -559,7 +706,7 @@ async function main() {
   const nullLinkedin = (allProfiles || []).filter((r: any) =>
     r.profile?.basic_profile?.linkedin_profile_url === null
   ).length;
-  console.log(`  Null LinkedIn: ${nullLinkedin} (~${Math.round(nullLinkedin / 15)}%)`);
+  console.log(`  Null LinkedIn: ${nullLinkedin} (~${Math.round(nullLinkedin / 20)}%)`);
 
   // Smoke query: "React" + senior
   const { data: smoke } = await supabase
@@ -570,6 +717,15 @@ async function main() {
   const smokeCount = smoke?.length || 0;
   console.log(`  Smoke query (React + senior): ${smokeCount}`);
   if (smokeCount < 10) { console.error("  ❌ Expected ≥10 results"); process.exit(1); }
+
+  // Smoke query: embedded/firmware
+  const { data: smokeEmb } = await supabase
+    .from("mock_profiles")
+    .select("id")
+    .eq("role_family", "embedded");
+  const smokeEmbCount = smokeEmb?.length || 0;
+  console.log(`  Smoke query (embedded family): ${smokeEmbCount}`);
+  if (smokeEmbCount < 40) { console.error("  ❌ Expected ≥40 embedded results"); process.exit(1); }
 
   console.log("\n✅ Seed complete!\n");
 }

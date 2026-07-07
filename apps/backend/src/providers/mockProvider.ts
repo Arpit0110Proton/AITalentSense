@@ -24,6 +24,17 @@ const ROLE_FAMILY_KEYWORDS: Record<string, string[]> = {
   legal: ["legal", "lawyer", "counsel", "compliance", "attorney", "contract"],
   cybersecurity: ["cybersecurity", "security", "infosec", "penetration", "soc", "firewall", "cryptography"],
   hr: ["hr", "human resources", "recruiter", "talent acquisition", "people ops", "people operations"],
+  // ── 10 new families ──
+  embedded: ["embedded", "firmware", "microcontroller", "stm32", "rtos", "ble", "bluetooth", "iot", "arm cortex", "cubemx", "freertos", "mcu", "i2c", "spi", "uart"],
+  hardware: ["hardware", "fpga", "verilog", "vlsi", "asic", "pcb design", "chip design", "rtl", "eda", "cadence", "synopsys", "altium", "kicad", "signal integrity"],
+  mechanical: ["mechanical", "solidworks", "cad", "cam", "ansys", "catia", "fea", "cfd", "cnc", "3d printing", "hvac", "thermal", "manufacturing", "gd&t"],
+  "civil-construction": ["civil", "structural", "construction", "autocad", "revit", "bim", "surveying", "staad", "etabs", "primavera", "concrete", "steel structure"],
+  "biotech-pharma": ["biotech", "pharma", "molecular biology", "clinical trial", "drug discovery", "bioinformatics", "genomics", "pcr", "hplc", "gmp", "fda", "crispr", "pharmacology"],
+  "finance-accounting": ["finance", "accounting", "financial", "accountant", "auditing", "tax", "fp&a", "cfo", "bookkeeping", "gaap", "ifrs", "budgeting", "chartered accountant"],
+  "supply-chain": ["supply chain", "procurement", "logistics", "inventory", "warehouse", "erp", "demand planning", "vendor management", "lean manufacturing", "scm"],
+  "content-media": ["content creator", "video production", "journalism", "video editor", "podcasting", "scriptwriting", "copyediting", "final cut", "premiere", "davinci"],
+  "customer-success": ["customer success", "customer support", "csm", "retention", "onboarding", "zendesk", "intercom", "customer experience", "churn", "csat", "nps"],
+  "cloud-architecture": ["solutions architect", "cloud architect", "enterprise architect", "cloud migration", "togaf", "multi-cloud", "serverless", "cloud solution"],
 };
 
 function matchRoleFamily(titles: string[], skills: string[]): string {
