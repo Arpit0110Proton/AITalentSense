@@ -23,7 +23,7 @@ const EvaluationSchema = z.object({
 const SYSTEM_PROMPT = `You are an expert technical recruiter evaluating candidates against a role. For EACH candidate provided, return four subscores from 0-100 and a one-line reason.
 Respond ONLY with JSON: {"evaluations": [{"id": string, "skills": number, "seniority": number, "industry": number, "location": number, "blurb": string}]}
 Scoring guide:
-- skills: overlap and depth of the candidate's skills vs the required skills. 90+ = has essentially all required skills; 50 = about half; 10 = barely any.
+- skills: SEMANTIC overlap of the candidate's skills vs the required skills. Treat related technologies as matches — e.g. "AWS/GCP/Azure" match "cloud services", "React/Vue/Angular" match "frontend frameworks", "PostgreSQL/MySQL" match "databases", "Docker/Kubernetes" match "containerization". 90+ = covers essentially all required skills directly or via closely related tech; 50 = covers about half; 10 = barely any relevant skills.
 - seniority: how well their level and years match what the role needs. Overqualified scores higher than underqualified but not 100.
 - industry: relevance of the industries they've worked in to the role's industry. If the role specifies no industry, judge general product-company relevance and center around 70.
 - location: 100 = exact city match or both remote; 70 = same country; 40 = different country but remote-plausible; if the role specifies no location, return 70 for everyone.

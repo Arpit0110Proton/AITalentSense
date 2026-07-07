@@ -69,14 +69,14 @@ export function parseJd(jdText: string) {
   });
 }
 
-export function searchCandidates(jdText: string, filters: FilterSet) {
+export function searchCandidates(jdText: string, filters: FilterSet, limit = 25) {
   return apiFetch<{
     searchId: string;
     mode: "mock" | "live";
     candidates: CandidateProfile[];
   }>("/api/search", {
     method: "POST",
-    body: JSON.stringify({ jdText, filters }),
+    body: JSON.stringify({ jdText, filters, limit }),
   });
 }
 

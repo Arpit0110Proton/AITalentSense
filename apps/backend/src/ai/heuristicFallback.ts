@@ -9,25 +9,105 @@ const SENIORITY_INDEX: Record<Seniority, number> = {
   director: 4,
 };
 
-function jaccardSimilarity(a: string[], b: string[]): number {
-  const setA = new Set(a.map((s) => s.toLowerCase()));
-  const setB = new Set(b.map((s) => s.toLowerCase()));
-  let intersection = 0;
-  for (const item of setA) {
-    if (setB.has(item)) intersection++;
+// Skill synonym groups — skills within the same group count as semantic matches
+const SKILL_GROUPS: string[][] = [
+  // Cloud platforms
+  ["cloud services", "cloud computing", "cloud", "aws", "amazon web services", "gcp", "google cloud", "azure", "microsoft azure", "cloud infrastructure"],
+  // Frontend frameworks
+  ["frontend", "front-end", "react", "reactjs", "react.js", "vue", "vuejs", "vue.js", "angular", "angularjs", "svelte", "next.js", "nextjs", "nuxt", "gatsby"],
+  // Backend frameworks
+  ["backend", "back-end", "node.js", "nodejs", "express", "express.js", "fastify", "django", "flask", "spring", "spring boot", "rails", "ruby on rails", "laravel", "nestjs"],
+  // Programming languages
+  ["javascript", "js", "typescript", "ts"],
+  ["python", "python3"],
+  ["java", "kotlin", "scala"],
+  ["c#", "csharp", ".net", "dotnet", "asp.net"],
+  ["go", "golang"],
+  ["rust", "rustlang"],
+  ["ruby", "rb"],
+  ["php"],
+  ["swift", "objective-c", "ios development"],
+  // Databases
+  ["databases", "database", "sql", "postgresql", "postgres", "mysql", "mariadb", "sqlite", "oracle", "sql server", "mssql"],
+  ["nosql", "mongodb", "mongo", "dynamodb", "cassandra", "couchdb", "firestore"],
+  ["redis", "memcached", "caching"],
+  // DevOps & Infrastructure
+  ["devops", "ci/cd", "cicd", "continuous integration", "continuous deployment", "jenkins", "github actions", "gitlab ci", "circleci"],
+  ["docker", "containerization", "containers", "kubernetes", "k8s", "container orchestration"],
+  ["terraform", "infrastructure as code", "iac", "cloudformation", "pulumi", "ansible"],
+  // Data & ML
+  ["machine learning", "ml", "deep learning", "artificial intelligence", "ai", "neural networks"],
+  ["data science", "data analysis", "data analytics", "statistics", "statistical analysis"],
+  ["data engineering", "etl", "data pipelines", "apache spark", "spark", "kafka", "airflow"],
+  ["nlp", "natural language processing", "text mining", "language models"],
+  ["computer vision", "image recognition", "opencv"],
+  // Mobile
+  ["mobile development", "react native", "flutter", "ionic", "xamarin"],
+  ["android", "android development", "kotlin android"],
+  ["ios", "ios development", "swift", "swiftui"],
+  // Testing
+  ["testing", "test automation", "unit testing", "jest", "mocha", "pytest", "selenium", "cypress", "playwright", "qa"],
+  // Design
+  ["ui design", "ux design", "ui/ux", "figma", "sketch", "adobe xd", "user experience", "user interface"],
+  // API & Communication
+  ["rest", "rest api", "restful", "graphql", "grpc", "api design", "api development"],
+  ["microservices", "service oriented architecture", "soa", "distributed systems"],
+  // Security
+  ["cybersecurity", "security", "infosec", "information security", "penetration testing", "owasp"],
+  // Project / Agile
+  ["agile", "scrum", "kanban", "project management", "jira", "sprint planning"],
+  // Version control
+  ["git", "github", "gitlab", "bitbucket", "version control"],
+  // Monitoring
+  ["monitoring", "observability", "datadog", "new relic", "prometheus", "grafana", "splunk", "elk", "logging"],
+];
+
+// Build a lookup: lowercase skill → group index
+const skillToGroupIndex = new Map<string, number>();
+SKILL_GROUPS.forEach((group, idx) => {
+  group.forEach((skill) => {
+    skillToGroupIndex.set(skill.toLowerCase(), idx);
+  });
+});
+
+/**
+ * Check if two skill strings are semantically related
+ * (either exact match or in the same synonym group).
+ */
+function skillsMatch(a: string, b: string): boolean {
+  const la = a.toLowerCase();
+  const lb = b.toLowerCase();
+  if (la === lb) return true;
+  // Substring containment (e.g. "react" in "react.js")
+  if (la.includes(lb) || lb.includes(la)) return true;
+  // Same synonym group
+  const groupA = skillToGroupIndex.get(la);
+  const groupB = skillToGroupIndex.get(lb);
+  if (groupA !== undefined && groupB !== undefined && groupA === groupB) return true;
+  return false;
+}
+
+/**
+ * Compute semantic skill overlap as a score 0-100.
+ * For each required skill, check if any candidate skill semantically matches.
+ */
+function semanticSkillOverlap(candidateSkills: string[], requiredSkills: string[]): number {
+  if (requiredSkills.length === 0) return 70; // No requirements → neutral
+  let matched = 0;
+  for (const req of requiredSkills) {
+    if (candidateSkills.some((cs) => skillsMatch(cs, req))) {
+      matched++;
+    }
   }
-  const union = setA.size + setB.size - intersection;
-  return union === 0 ? 0 : intersection / union;
+  return Math.round((matched / requiredSkills.length) * 100);
 }
 
 export function heuristicScore(
   candidate: CandidateProfile,
   filters: FilterSet
 ): ScoredCandidate {
-  // Skills: Jaccard × 100
-  const skillsScore = Math.round(
-    jaccardSimilarity(candidate.skills, filters.skills) * 100
-  );
+  // Skills: semantic overlap
+  const skillsScore = semanticSkillOverlap(candidate.skills, filters.skills);
 
   // Seniority: 100 - 25 × |bandIndex(candidate) - nearest bandIndex(required)|, floor 0
   let seniorityScore: number;
@@ -46,10 +126,6 @@ export function heuristicScore(
   if (filters.industries.length === 0) {
     industryScore = 70;
   } else {
-    const candidateIndustries = [
-      ...candidate.pastRoles.map(() => ""), // no industry on pastRoles in this context
-    ];
-    // Check headline/company for industry clues — simplified: check if any filter industry appears in summary
     const allText = `${candidate.summary} ${candidate.headline} ${candidate.currentCompany}`.toLowerCase();
     const hasMatch = filters.industries.some((ind) =>
       allText.includes(ind.toLowerCase())
@@ -78,9 +154,9 @@ export function heuristicScore(
     }
   }
 
-  // Shared skills for blurb
+  // Shared skills for blurb — semantic match
   const sharedSkills = candidate.skills.filter((s) =>
-    filters.skills.some((fs) => fs.toLowerCase() === s.toLowerCase())
+    filters.skills.some((fs) => skillsMatch(s, fs))
   );
 
   const subscores = {

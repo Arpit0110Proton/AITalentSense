@@ -6,16 +6,17 @@ const router = Router();
 
 router.post("/", async (req, res, next) => {
   try {
-    const { jdText, filters } = req.body;
+    const { jdText, filters, limit: rawLimit } = req.body;
     if (!jdText || !filters) {
       res.status(400).json({ error: "validation", message: "jdText and filters are required" });
       return;
     }
 
+    const limit = Math.min(50, Math.max(5, Number(rawLimit) || 25));
     const provider = getProvider();
 
     // Search for candidates (immediate response — unscored)
-    const candidates = await provider.search(filters, 25);
+    const candidates = await provider.search(filters, limit);
 
     // FEATURE 1 — populate job_title for grouped history
     const jobTitle = (filters.titles && filters.titles[0]) || "Manual search";

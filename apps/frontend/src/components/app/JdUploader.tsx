@@ -51,6 +51,9 @@ export function JdUploader({ onExtracted }: JdUploaderProps) {
       try {
         const result = await parseJdFile(file);
         onExtracted(result.filters, result.extractedText);
+        setProcessing(false);
+        // Keep filename visible briefly so user sees confirmation
+        setTimeout(() => setFileName(null), 1500);
       } catch (err) {
         showToast(
           (err instanceof Error ? err.message : "Upload failed") +

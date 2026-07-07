@@ -64,6 +64,7 @@ function SearchPageContent() {
   const [hasEdited, setHasEdited] = useState(false);
   const [slowWarn, setSlowWarn] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
+  const [candidateCount, setCandidateCount] = useState(25);
 
   // Pre-load search for editing if 'edit' query param is present
   useEffect(() => {
@@ -162,7 +163,7 @@ function SearchPageContent() {
     }
 
     try {
-      const result = await searchCandidates(effectiveJdText, currentFilters);
+      const result = await searchCandidates(effectiveJdText, currentFilters, candidateCount);
       // Store data for results page
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-page data store
       (globalThis as any).__ats_search_store[result.searchId] = {
@@ -391,7 +392,7 @@ function SearchPageContent() {
 
               <motion.div
                 variants={fadeRise}
-                className="mt-6 flex items-center gap-3"
+                className="mt-6 flex flex-wrap items-center gap-3"
               >
                 <Button
                   onClick={handleSearch}
@@ -411,6 +412,24 @@ function SearchPageContent() {
                     "Search candidates"
                   )}
                 </Button>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="candidate-count" className="font-satoshi text-small text-espresso-60 whitespace-nowrap">
+                    Show
+                  </label>
+                  <select
+                    id="candidate-count"
+                    value={candidateCount}
+                    onChange={(e) => setCandidateCount(Number(e.target.value))}
+                    className="rounded-chip border border-tan bg-cream px-3 py-1.5 font-satoshi text-small text-espresso outline-none focus:border-olive focus:ring-1 focus:ring-olive"
+                  >
+                    {[5, 10, 15, 20, 25, 30, 40, 50].map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
+                  <span className="font-satoshi text-small text-espresso-60 whitespace-nowrap">
+                    candidates
+                  </span>
+                </div>
                 <Button variant="secondary" onClick={handleStartOver}>
                   Start over
                 </Button>
